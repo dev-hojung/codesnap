@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { toPng } from 'html-to-image';
+import { toPng, toSvg } from 'html-to-image';
 
 export default function ExportActions() {
   const [exporting, setExporting] = useState(false);
@@ -27,6 +27,27 @@ export default function ExportActions() {
       link.click();
     } catch (err) {
       console.error('이미지 내보내기 실패:', err);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDownloadSvg = async () => {
+    const element = getPreviewElement();
+    if (!element) return;
+
+    setExporting(true);
+    try {
+      const dataUrl = await toSvg(element, {
+        pixelRatio: 2,
+        cacheBust: true,
+      });
+      const link = document.createElement('a');
+      link.download = 'codesnap.svg';
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('SVG 내보내기 실패:', err);
     } finally {
       setExporting(false);
     }
@@ -84,6 +105,28 @@ export default function ExportActions() {
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
         {exporting ? '내보내는 중...' : 'PNG 다운로드'}
+      </button>
+      <button
+        onClick={handleDownloadSvg}
+        disabled={exporting}
+        className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 disabled:opacity-50 text-white font-medium py-2.5 px-4 rounded-xl transition-all text-sm"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        {exporting ? '내보내는 중...' : 'SVG 다운로드'}
       </button>
       <button
         onClick={handleCopy}
